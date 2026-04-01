@@ -1,6 +1,6 @@
 """
-Painel Shopee — Precision Panel
-================================
+Resumo da Loja — Shopee
+========================
 Instalar dependências:
     pip install customtkinter pandas openpyxl matplotlib
 
@@ -169,7 +169,7 @@ def card(parent, **kw):
                         border_width=1, border_color=C["borda"], **kw)
 
 def lbl_hint(parent, text):
-    return ctk.CTkLabel(parent, text=text.upper(), font=(FONTE,10),
+    return ctk.CTkLabel(parent, text=text.upper(), font=(FONTE,11),
                         text_color=C["cinza_lbl"])
 
 def lbl_valor(parent, text, size=26, cor=None):
@@ -200,7 +200,7 @@ def btn_import(parent, text, cmd):
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Precision Panel — Sellers Edition")
+        self.title("Resumo da Loja — Shopee")
         self.geometry("1100x720")
         self.minsize(900,580)
         self.configure(fg_color=C["fundo"])
@@ -233,9 +233,9 @@ class App(ctk.CTk):
                      text_color=C["branco"]).place(relx=.5,rely=.5,anchor="center")
         tx = ctk.CTkFrame(logo, fg_color=C["sidebar"], corner_radius=0)
         tx.pack(side="left", padx=(10,0))
-        ctk.CTkLabel(tx, text="Precision Panel",
+        ctk.CTkLabel(tx, text="Resumo da Loja",
                      font=(FONTE,13,"bold"), text_color=C["texto"]).pack(anchor="w")
-        ctk.CTkLabel(tx, text="SELLERS EDITION",
+        ctk.CTkLabel(tx, text="PARA VENDEDORES",
                      font=(FONTE,8), text_color=C["texto_sec"]).pack(anchor="w")
 
         self._nav = {}
@@ -381,62 +381,66 @@ class App(ctk.CTk):
     def _calc(self):
         p = self.content
         topo = ctk.CTkFrame(p, fg_color=C["fundo"], corner_radius=0)
-        topo.pack(fill="x", padx=28, pady=(24,16))
+        topo.pack(fill="x", padx=28, pady=(24,12))
         ctk.CTkLabel(topo, text="SIMULADOR E FINANCEIRO",
-                     font=(FONTE,10), text_color=C["laranja"]).pack(anchor="w")
+                     font=(FONTE,11), text_color=C["laranja"]).pack(anchor="w")
         ctk.CTkLabel(topo, text="Calculadora de Taxas",
                      font=(FONTE,22,"bold"), text_color=C["texto"]).pack(anchor="w")
 
         corpo = ctk.CTkFrame(p, fg_color=C["fundo"], corner_radius=0)
-        corpo.pack(fill="both", expand=True, padx=20)
+        corpo.pack(fill="both", expand=True, padx=20, pady=(0,16))
         corpo.grid_columnconfigure(0, weight=3)
         corpo.grid_columnconfigure(1, weight=2)
+        corpo.grid_rowconfigure(0, weight=1)
 
-        # esquerda
-        esq = ctk.CTkScrollableFrame(corpo, fg_color=C["fundo"], corner_radius=0)
+        # ── esquerda (sem scroll) ─────────────────────────────────────────────
+        esq = ctk.CTkFrame(corpo, fg_color=C["fundo"], corner_radius=0)
         esq.grid(row=0, column=0, sticky="nsew", padx=(0,8))
 
+        # configurações em linha horizontal
         cfg = card(esq)
-        cfg.pack(fill="x", pady=(0,12))
-        lbl_hint(cfg, "Configurações de Canal").pack(anchor="w", padx=16, pady=(14,8))
+        cfg.pack(fill="x", pady=(0,10))
+        lbl_hint(cfg, "Configurações de Canal").pack(anchor="w", padx=16, pady=(12,6))
         sep(cfg)
 
         self.var_frete = ctk.BooleanVar(value=True)
         self.var_alto  = ctk.BooleanVar(value=False)
 
-        for var, titulo, sub in [
-            (self.var_frete, "Programa Frete Grátis",
-             "Comissão total de 20% sobre o valor da venda"),
-            (self.var_alto, "Vendedor CPF",
-             "+450 pedidos em 90 dias (+R$3 fixo por item)"),
-        ]:
-            rw = ctk.CTkFrame(cfg, fg_color=C["fundo"], corner_radius=8)
-            rw.pack(fill="x", padx=16, pady=6)
-            tx = ctk.CTkFrame(rw, fg_color=C["fundo"], corner_radius=0)
-            tx.pack(side="left", fill="both", expand=True, padx=(12,0))
-            ctk.CTkLabel(tx, text=titulo, font=(FONTE,13,"bold"),
-                         text_color=C["texto"]).pack(anchor="w", pady=(8,0))
-            ctk.CTkLabel(tx, text=sub, font=(FONTE,10),
-                         text_color=C["texto_sec"]).pack(anchor="w", pady=(0,8))
-            ctk.CTkSwitch(rw, variable=var, text="",
+        linha_tog = ctk.CTkFrame(cfg, fg_color=C["branco"], corner_radius=0)
+        linha_tog.pack(fill="x", padx=16, pady=(4,12))
+        linha_tog.grid_columnconfigure((0,1), weight=1)
+
+        for col, (var, titulo, sub) in enumerate([
+            (self.var_frete, "Programa Frete Grátis", "Comissão de 20% sobre a venda"),
+            (self.var_alto,  "Vendedor CPF",           "+450 pedidos/90 dias (+R$3/item)"),
+        ]):
+            blk = ctk.CTkFrame(linha_tog, fg_color=C["fundo"], corner_radius=8)
+            blk.grid(row=0, column=col, padx=(0,8) if col==0 else (8,0), sticky="ew")
+            top_row = ctk.CTkFrame(blk, fg_color=C["fundo"], corner_radius=0)
+            top_row.pack(fill="x", padx=10, pady=(8,0))
+            ctk.CTkLabel(top_row, text=titulo, font=(FONTE,13,"bold"),
+                         text_color=C["texto"]).pack(side="left")
+            ctk.CTkSwitch(top_row, variable=var, text="",
                           progress_color=C["laranja"],
                           button_color=C["branco"],
                           button_hover_color=C["fundo"],
-                          width=48, height=24,
-                          command=self._calc_render).pack(side="right", padx=12)
-        ctk.CTkFrame(cfg, height=8, fg_color=C["fundo"], corner_radius=0).pack()
+                          width=44, height=22,
+                          command=self._calc_render).pack(side="right")
+            ctk.CTkLabel(blk, text=sub, font=(FONTE,11),
+                         text_color=C["texto_sec"]).pack(anchor="w", padx=10, pady=(2,8))
 
+        # tabela de produtos
         tab = card(esq)
-        tab.pack(fill="x", pady=(0,12))
-        lbl_hint(tab, "Itens para Cálculo").pack(anchor="w", padx=16, pady=(14,4))
+        tab.pack(fill="both", expand=True, pady=(0,10))
+        lbl_hint(tab, "Itens para Cálculo").pack(anchor="w", padx=16, pady=(12,4))
         sep(tab)
 
         hdr = ctk.CTkFrame(tab, fg_color=C["branco"], corner_radius=0)
         hdr.pack(fill="x", padx=16, pady=(4,0))
         hdr.grid_columnconfigure(0, weight=3); hdr.grid_columnconfigure(1, weight=1)
-        ctk.CTkLabel(hdr, text="NOME DO PRODUTO", font=(FONTE,9),
+        ctk.CTkLabel(hdr, text="NOME DO PRODUTO", font=(FONTE,10),
                      text_color=C["cinza_lbl"]).grid(row=0,column=0,sticky="w")
-        ctk.CTkLabel(hdr, text="PREÇO DE VENDA (R$)", font=(FONTE,9),
+        ctk.CTkLabel(hdr, text="PREÇO (R$)", font=(FONTE,10),
                      text_color=C["cinza_lbl"]).grid(row=0,column=1,sticky="w",padx=(8,0))
 
         self.prod_frame = ctk.CTkFrame(tab, fg_color=C["branco"], corner_radius=0)
@@ -444,19 +448,24 @@ class App(ctk.CTk):
         self.produtos_vars = []
         for _ in range(3): self._add_prod()
 
-        ctk.CTkButton(tab, text="+ ADICIONAR LINHA",
-                      fg_color=C["branco"], text_color=C["laranja"],
-                      hover_color=C["laranja_clr"], font=(FONTE,11,"bold"),
-                      corner_radius=0, height=36,
-                      command=self._add_prod).pack(fill="x", padx=16, pady=(4,0))
+        btn_row = ctk.CTkFrame(tab, fg_color=C["branco"], corner_radius=0)
+        btn_row.pack(fill="x", padx=16, pady=(4,12))
+        btn_row.grid_columnconfigure((0,1), weight=1)
 
-        ctk.CTkButton(tab, text="CALCULAR RECEBÍVEIS",
+        ctk.CTkButton(btn_row, text="+ Adicionar linha",
+                      fg_color=C["branco"], text_color=C["laranja"],
+                      hover_color=C["laranja_clr"], font=(FONTE,12,"bold"),
+                      corner_radius=8, height=36, border_width=1,
+                      border_color=C["laranja_brd"],
+                      command=self._add_prod).grid(row=0,column=0,padx=(0,4),sticky="ew")
+
+        ctk.CTkButton(btn_row, text="Calcular",
                       fg_color=C["laranja"], hover_color=C["laranja_hov"],
                       text_color=C["branco"], font=(FONTE,12,"bold"),
-                      corner_radius=8, height=44,
-                      command=self._calc_render).pack(fill="x", padx=16, pady=12)
+                      corner_radius=8, height=36,
+                      command=self._calc_render).grid(row=0,column=1,padx=(4,0),sticky="ew")
 
-        # direita
+        # ── direita (resultados, com scroll) ─────────────────────────────────
         self.res_sc = ctk.CTkScrollableFrame(corpo, fg_color=C["fundo"],
                                               corner_radius=0)
         self.res_sc.grid(row=0, column=1, sticky="nsew", padx=(8,0))
@@ -466,22 +475,22 @@ class App(ctk.CTk):
         vn = ctk.StringVar(); vp = ctk.StringVar()
         self.produtos_vars.append((vn, vp))
         rw = ctk.CTkFrame(self.prod_frame, fg_color=C["branco"], corner_radius=0)
-        rw.pack(fill="x", pady=4)
+        rw.pack(fill="x", pady=3)
         rw.grid_columnconfigure(0, weight=3); rw.grid_columnconfigure(1, weight=1)
         e1 = ctk.CTkEntry(rw, textvariable=vn, placeholder_text="Nome do produto",
-                          font=(FONTE,12), height=36,
+                          font=(FONTE,13), height=32,
                           fg_color=C["fundo"], border_color=C["borda"],
                           text_color=C["texto"])
         e1.grid(row=0, column=0, sticky="ew")
         e1.bind("<KeyRelease>", lambda e: self._calc_render())
         e2 = ctk.CTkEntry(rw, textvariable=vp, placeholder_text="0,00",
-                          font=(FONTE,12), height=36, width=100,
+                          font=(FONTE,13), height=32, width=100,
                           fg_color=C["fundo"], border_color=C["borda"],
                           text_color=C["texto"])
         e2.grid(row=0, column=1, padx=(8,0), sticky="ew")
         e2.bind("<KeyRelease>", lambda e: self._calc_render())
         idx = len(self.produtos_vars)-1
-        ctk.CTkButton(rw, text="×", width=28, height=28,
+        ctk.CTkButton(rw, text="×", width=26, height=26,
                       fg_color=C["fundo"], text_color=C["texto_sec"],
                       hover_color=C["verm_fnd"], corner_radius=6,
                       command=lambda r=rw, i=idx: self._rem_prod(r,i)
